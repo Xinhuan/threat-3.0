@@ -1,0 +1,19 @@
+The design of Threat-3.0 should be split into:
+
+* core (data storage)
+* comms
+* CLEU handler
+* mob debuff/CC tracking status
+* threat debug/breakdown
+* talent handler
+* buff/debuff handler
+* gear handler
+* external API
+* ability modules
+* boss modules
+
+It should follow an MVC split where
+
+M: internal API/data storage
+V: frontend (Omen)
+C: handlers for various events
