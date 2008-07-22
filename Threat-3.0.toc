@@ -1,0 +1,12 @@
+## Interface: 30000
+## Title: Lib: Threat-3.0
+## Author: Antiarc, Nevcairiel, charon, Xinhuan, Arrowmaster
+## Notes: Library for multi-target threat tracking
+## OptionalDeps: Ace3, CallbackHandler-1.0
+## X-Category: Library
+
+core.lua
+utils.lua
+
+models\player.lua
+models\mob.lua
