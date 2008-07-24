@@ -1,30 +1,42 @@
 local base = {}
 local base_mt = {__index = base}
+Threat30.EmbedCallbacks(base)
+
+local mobList = Threat30.mob_list
 
 function Threat30:NewPlayer(guid)
 	local t = Threat.newTable()
 	setmetatable(t, base_mt)
-	t.mobs = Threat.newTable()
 	t.guid = guid
+	self:FireCallback("PlayerCreated", t)
 end
 
 function playerBase:AddThreat(guid, threat)
-	mobs[guid] = mobs[guid] or Threat30:NewMob(guid)
-	mobs[guid]:AddThreat(self.guid, threat)
+	mobList:AddThreatOn(guid, self.guid, threat)
 end
 
-function playerBase:AddGlobalThreat(threat)
-	Threat30.mob_list:AddGlobalThreat(self.guid, threat)
+function playerBase:AddThreatOnAll(threat)
+	mobList:AddGlobalThreat(self.guid, threat)
+end
+
+function playerBase:MultiplyThreatOn(mobGUID, multiplier)
+	mobList:MultiplyThreatOn(mobGUID, self.guid, multiplier)
+end
+
+function playerBase:MultiplyThreatOnAll(mobGUID, multiplier)
+	mobList:MultiplyThreatOnAll(mobGUID, self.guid, multiplier)
+end
+
+function playerBase:SetThreatOnAll(threat)
+	mobList:SetThreatOnAll(self.guid, threat)
+end
+
+function playerBase:GetThreatOn(mobGUID)
+	return mobList:GetThreatOn(mobGUID, self.guid)
 end
 
 function playerBase:Death()
-	self:SetAllThreat(0)
-end
-
-function playerBase:SetAllThreat(threat)
-	for k, v in pairs(mobs) do
-		v:SetThreat(self.guid, threat)
-	end
+	mobList:SetThreatOnAll(0)
 end
 
 function playerBase:Destroy()

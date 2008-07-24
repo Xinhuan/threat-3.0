@@ -38,10 +38,37 @@ function base:MobUnCrowdControlled(mob)
 	encounterMobs = encounterMobs + 1
 end
 
--- Should be called from Player:AddGlobalThreat, not by the core itself
-function base:AddGlobalThreat(playerGUID, threat)
+function base:AddThreatOn(mobGUID, playerGUID, threat)
+	mobs[mobGUID] = mobs[mobGUID] or Threat30:CreateMob(mobGUID)
+	mobs[mobGUID]:AddThreat(playerGUID, threat)
+end
+
+function base:AddThreatOnAll(playerGUID, threat)
 	local perMobThreat = threat / encounterMobs
 	for guid, mob in pairs(mobs) do
 		mob:AddThreat(playerGUID, perMobThreat)
 	end
+end
+
+function base:MultiplyThreatOn(mobGUID, playerGUID, multiplier)
+	mobs[mobGUID] = mobs[mobGUID] or Threat30:CreateMob(mobGUID)
+	mobs[mobGUID]:MultiplyThreat(playerGUID, threat)
+end
+
+function base:MultiplyThreatOnAll(playerGUID, multiplier)
+	for guid, mob in pairs(mobs) do
+		mob:MultiplyThreat(playerGUID, multiplier)
+	end
+end
+
+function base:SetThreatOnAll(playerGUID, threat)
+	for guid, mob in pairs(mobs) do
+		mob:SetThreat(playerGUID, threat)
+	end
+end
+
+function base:GetThreatOn(mobGUID, playerGUID)
+	local mob = mobs[mobGUID]
+	if not mob then return 0 end
+	mob:GetThreatForPlayer(playerGUID)
 end

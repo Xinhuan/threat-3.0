@@ -8,8 +8,9 @@
 utils.lua
 core.lua
 
-models\player.lua
 models\mob.lua
+models\mob_list.lua
+models\player.lua
 
 tests\core.lua
 tests\events.lua
