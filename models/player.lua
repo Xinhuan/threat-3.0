@@ -11,35 +11,35 @@ function Threat30:NewPlayer(guid)
 	self:FireCallback("PlayerCreated", t)
 end
 
-function playerBase:AddThreat(guid, threat)
+function base:AddThreat(guid, threat)
 	mobList:AddThreatOn(guid, self.guid, threat)
 end
 
-function playerBase:AddThreatOnAll(threat)
+function base:AddThreatOnAll(threat)
 	mobList:AddGlobalThreat(self.guid, threat)
 end
 
-function playerBase:MultiplyThreatOn(mobGUID, multiplier)
+function base:MultiplyThreatOn(mobGUID, multiplier)
 	mobList:MultiplyThreatOn(mobGUID, self.guid, multiplier)
 end
 
-function playerBase:MultiplyThreatOnAll(mobGUID, multiplier)
+function base:MultiplyThreatOnAll(mobGUID, multiplier)
 	mobList:MultiplyThreatOnAll(mobGUID, self.guid, multiplier)
 end
 
-function playerBase:SetThreatOnAll(threat)
+function base:SetThreatOnAll(threat)
 	mobList:SetThreatOnAll(self.guid, threat)
 end
 
-function playerBase:GetThreatOn(mobGUID)
+function base:GetThreatOn(mobGUID)
 	return mobList:GetThreatOn(mobGUID, self.guid)
 end
 
-function playerBase:Death()
+function base:Death()
 	mobList:SetThreatOnAll(0)
 end
 
-function playerBase:Destroy()
+function base:Destroy()
 	--[[
 	Clean up, should notify other clients that this player is no longer in combat
 	This will primarily be for pets, who despawn and respawn relatively regularly
@@ -52,6 +52,7 @@ function playerBase:Destroy()
 	
 	In order to get rid of the last reference to this table.
 	]]-- 
-	self.mobs = Threat30.delTable(self.mobs)
+	
+	self:FireCallback("PlayerDestroyed")
 	return Threat30.delTable(self)
 end
