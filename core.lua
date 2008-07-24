@@ -11,6 +11,4 @@ function Threat30:OnDisable()
 	self.enabled = false
 end
 
-Threat30:RegisterEvent("ADDON_LOADED")
-Threat30:RegisterEvent("PLAYER_LOGIN")
 Threat30.DebugFrame = ChatFrame1
