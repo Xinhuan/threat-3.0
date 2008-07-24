@@ -1,6 +1,9 @@
 local eventFrame = CreateFrame("Frame", "Threat30EventFrame")
-Threat30[0] = eventFrame[0];
+
+-- Make Threat30 behave like a frame. This lets us use event handling directly, rather than having to proxy through another table, which saves us a method
+-- invocation per event handled!
 Threat30 = setmetatable({}, getmetatable(eventFrame))
+Threat30[0] = eventFrame[0];
 
 -- Table recycling
 local new, newHash, newSet, del
@@ -46,6 +49,25 @@ do
 	Threat30.delTable = del
 end
 
+-- Event handling
+--[[
+	Register events via:
+	
+	Threat30.RegisterEvent(self, "UNIT_AURA"[, handlerStringOrMethod])
+	
+	"self" is the object that the handler exists on. It does not have to be the Threat30 object.
+	
+	Event handlers are stored in a single lookup table, consisting of:
+	{
+		EVENT_NAME = {
+			object = handler,
+			object = handler,
+			object = handler
+		}
+	}
+	
+	Thus, when an event is fired, we need to look up the event in the table, then iterate all objects that have registered the event and invoke the handler for each.
+]]--
 do
 	local registeredEvents = {}
 	local function onEvent(self, event, ...)
@@ -76,7 +98,7 @@ do
 	function Threat30.RegisterEvent(self, name, handler)
 		eventFrame:RegisterEvent(name)
 		handler = handler or name
-		registeredEvents[name] = registeredEvents[name] or Threat30.newTable
+		registeredEvents[name] = registeredEvents[name] or Threat30.newTable()
 		local events = registeredEvents[name]
 		if type(handler) == "string" then
 			if self[name] and type(self[name]) == "function" then
@@ -104,6 +126,8 @@ do
 	end
 end
 
+-- Prints a debug message to the DebugFrame of your choice. 
+-- Currently ChatFrame1, set in core.lua
 function Threat30:Debug(msg, ...)
 	if self.DebugFrame then
 		local a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p = ...
@@ -128,6 +152,23 @@ function Threat30:Debug(msg, ...)
 	end
 end
 
+--[[
+	Callback handling
+	Callbacks are stored via 2 tables per object that embeds callbacks. These are indexed tables containing:
+	
+	{registering_obect_1, registering_obect_2, ..., registering_obect_n}
+	{handler_1, handler_2, ..., handler_n}
+	
+	When a callback is fired, the handlers are iterated, and the registering object is always passed as the first parameter.
+	
+	local t = {}
+	Threat30.EmbedCallbacks(t)
+	t:RegisterCallback(SomeOtherTable, "SomeCallback"[, handlerMethodOrString])
+	SomeOtherTable:FireCallback("SomeCallback", arg1, arg2)	
+	function t:SomeCallback(originatingTable, args...)
+		-- handle the callback
+	end
+]]--
 do
 	local callback_base = {}
 	local callback_base_mt = {__index = callback_base}
