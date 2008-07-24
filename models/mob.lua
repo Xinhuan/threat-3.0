@@ -14,20 +14,24 @@ function Threat30:CreateMob(guid)
 end
 
 function base:AddThreat(playerGUID, threat)
-	
 	if self.isCrowdControlled then return end
-	self.threat[playerGUID] = (self.threat[playerGUID] or 0) + threat
-	self:FireCallback("ThreatUpdated", playerGUID, self.threat[playerGUID])
+	local newThreat = (self.threat[playerGUID] or 0) + threat
+	if newThreat < 0 then newThreat = 0 end
+	self.threat[playerGUID] = newThreat
+	self:FireCallback("ThreatUpdated", playerGUID, newThreat)
 end
 
 function base:SetThreat(playerGUID, threat)
+	if threat < 0 then threat = 0 end
 	self.threat[playerGUID] = threat
-	self:FireCallback("ThreatUpdated", playerGUID, self.threat[playerGUID])
+	self:FireCallback("ThreatUpdated", playerGUID, threat)
 end
 
 function base:MultiplyThreat(playerGUID, multiplier)
-	self.threat[playerGUID] = (self.threat[playerGUID] or 0) * multiplier
-	self:FireCallback("ThreatUpdated", playerGUID, self.threat[playerGUID])
+	local newThreat = (self.threat[playerGUID] or 0) * multiplier
+	if newThreat < 0 then newThreat = 0 end
+	self.threat[playerGUID] = newThreat
+	self:FireCallback("ThreatUpdated", playerGUID, newThreat)
 end
 
 function base:GetThreatForPlayer(guid)
