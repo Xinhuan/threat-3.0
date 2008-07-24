@@ -5,8 +5,11 @@
 ## OptionalDeps: Ace3, CallbackHandler-1.0
 ## X-Category: Library
 
-core.lua
 utils.lua
+core.lua
 
 models\player.lua
 models\mob.lua
+
+tests\core.lua
+tests\events.lua
