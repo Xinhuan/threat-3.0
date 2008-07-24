@@ -17,3 +17,72 @@ It should follow an MVC split where
 M: internal API/data storage
 V: frontend (Omen)
 C: handlers for various events
+
+----------------------------------------------------------------
+utils.lua (event handling, callbacks, table recycling)
+core.lua  (initialization)
+
+models\mob.lua      (Mob)
+models\mob_list.lua (MobList)
+models\player.lua   (PlayerEntity)
+
+<class>.lua   (Class specific stuff, talents/spells/threatmods)
+pet.lua       (Pet specific stuff, talents/spells/threatmods)
+gear.lua      (Threat modifiers resulting from equipped gear)
+
+---------------------------------------------------------------
+
+                                                                                                                 A PlayerEntity will exist for every entity
+                                                                                                                 that Threat30 will keep track of threat for.
+  |-----------------------|      Threat30 uses CLEU to handle     |---------------------------------------|     |------------------------------------------|
+  |       Threat30        |      most threat transactions.        |  CLEU/event handler                   |     | PlayerEntity                             |
+  |-----------------------|      CLEU will update the threats     |---------------------------------------|     |------------------------------------------|
+  | utils.lua             | 1    of the player and his pet(s).  1 | player:PlayerEntity                   |     | gearThreatMod:double                     |
+  | core.lua              |---------------------------------------| pets:table ([petGUID] = PlayerEntity) |     | stanceThreatMod:double                   |
+  |-----------------------|                                       |---------------------------------------|     | buffThreatMod:double                     |
+              | 1                                                 |---------------------------------------|     | healThreatMod:double                     |
+              | Threat30 maintains a list of mobs in combat         /\  CLEU handler will spawn   /\            | schoolThreatMod:table                    |
+              | and their crowd controlled status and provides    1 \/  one player entity and     \/ 1          | spellHandlers:table                      |
+              | functions to manipulate their threat.                |  as many pets as needed    |             |------------------------------------------|
+              | 1                                                    |                            |             | AddThreat(guid, threat)                  |
+  |---------------------------------------------------|              |                            |           |\| AddThreatOnAll(threat)                   |
+  |       MobList                                     |              |       |--------------------------------|/| MultiplyThreatOn(mobGUID, multiplier)    |
+  |---------------------------------------------------|              |       |                    |             | MultiplyThreatOnAll(mobGUID, multiplier) |
+  | encounterMobs:integer                             |              |       |                    |           |\| SetThreatOnAll(threat)                   |
+  | mobs:table ([mobGUID] = Mob)                      |              |       |                    |   |-------|/| SetThreatOn(mobGUID):double              |
+  |---------------------------------------------------|            1 |       |                  * |   |         | Death()                                  |
+  | ClearList()                                       |           |----------------------|   |------------|     | Destroy()                                |
+  | MobCreated(mob)                                   |           | Player (the player)  |   |  Pet       |     |------------------------------------------|
+  | MobDied(mob)                                      | 1       1 |----------------------|   |------------|
+  | MobCrowdControlled(mob)                           |-----------| <class>.lua          |   | pet.lua    |
+  | MobUnCrowdControlled(mob)                         |           | gear.lua             |   |            |
+  | AddThreatOn(mobGUID, playerGUID, threat)          |           |----------------------|   |------------|
+  | AddThreatOnAll(playerGUID, threat)                | 1                                       * |
+  | MultiplyThreatOn(mobGUID, playerGUID, multiplier) |-------------------------------------------|
+  | MultiplyThreatOnAll(playerGUID, multiplier)       |  The player and pet entities interact with the MobList
+  | SetThreatOnAll(playerGUID, threat)                |  to update threat as instructed by the CLEU handler.
+  | GetThreatOn(mobGUID, playerGUID):double           |  The player inherits from the gear and class specific
+  |---------------------------------------------------|  modules, the pet from the pet module code necessary
+              /\ 1                                       to update the ThreatMods and spellHandlers.
+              \/
+              | The MobList contains a table of mobs.
+              | Each mob has a table of threat and
+              | its CC status.
+              | *
+ |----------------------------------------|
+ |               Mob                      |
+ |----------------------------------------|
+ | guid:string                            |
+ | threat:table ([playerGUID] = double)   |
+ | isCrowdControlled:boolean              |
+ | playerCount:integer (unused)           |
+ |----------------------------------------|
+ | AddThreat(playerGUID, threat)          |
+ | SetThreat(playerGUID, threat)          |
+ | MultiplyThreat(playerGUID, multiplier) |
+ | GetThreatForPlayer(guid):double        |
+ | CrowdControl()                         |
+ | UnCrowdControl()                       |
+ | Death()                                |
+ | Destroy()                              |
+ |----------------------------------------|
